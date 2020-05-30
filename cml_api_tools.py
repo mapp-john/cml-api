@@ -7,26 +7,13 @@ import json
 import socket
 import random
 import netaddr
-import getpass
-import requests
-from virl2_client import ClientLibrary as cmlClient
-
-
-
-#
-#
-#
-# Define Password Function
-def define_password():
-    password = None
-    while not password:
-        password = getpass.getpass('Please Enter API Password: ')
-        passwordverify = getpass.getpass('Re-enter API Password to Verify: ')
-        if not password == passwordverify:
-            print('Passwords Did Not Match Please Try Again')
-            password = None
-    return password
-
+from virl2_client \
+        import ClientLibrary \
+        as cmlClient
+# Import custom modules from file
+from cml_api_modules import \
+        define_password,\
+        GetAllLabDetails
 
 
 #
@@ -127,14 +114,7 @@ def TopoDownload(cml):
         print(f'Downloading topology for lab: {d["lab_title"]}')
         url = f'{cml.url}/api/v0/labs/{d["id"]}/topology'
     else:
-        d = {}
-        count = 1
-        for l in labs:
-            d[str(count)] = {}
-            lab = cml.join_existing_lab(l)
-            D = lab.details()
-            d[str(count)].update(D)
-            count += 1
+        d = GetAllLabDetails(cml)
         print('''
 ***********************************************************************************************
 *                             Please select lab to download                                   *
@@ -223,6 +203,8 @@ if __name__ == "__main__":
         # Validate FQDN
         if server[-1] == '/':
             server = server[:-1]
+        if server.startswith('https://') or server.startswith('http://'):
+            server = server.replace('http://','').replace('https://','')
 
         # Perform Test Connection To FQDN
         s = socket.socket()
@@ -232,8 +214,7 @@ if __name__ == "__main__":
             print(f'Connecton successful to {server} on port 443')
             Test = True
         except:
-            print(f'Connection to {server} on port 443 failed: {traceback.format_exc()}')
-            sys.exit()
+            print(f'Connection to {server} on port 443 failed: {traceback.format_exc()}\n\n')
 
     # Adding HTTPS to Server for URL
     server = f'https://{server}'
@@ -251,7 +232,11 @@ if __name__ == "__main__":
 *                                                                                             *
 *  1. Basic URL GET                                                                           *
 *                                                                                             *
-*  2. Download Topology and save to file                                                      *
+*  2. Download Lab Topology and save to file                                                  *
+*                                                                                             *
+*  3. Upload Lab Topology and Create Lab                                                      *
+*                                                                                             *
+*  4. Delete Lab                                                                              *
 *                                                                                             *
 ***********************************************************************************************
 ''')
@@ -272,10 +257,10 @@ if __name__ == "__main__":
                 TopoDownload(cml)
             #elif script == '3':
             #    Script = True
-            #    PostNetworkObjectGroup(server,headers,username,password)
-            #elif script == '4':
-            #    Script = True
-            #    PutIntrusionFile(server,headers,username,password)
+            #    TopoUpload(cml)
+            elif script == '4':
+                Script = True
+                LabDelete(cml)
             #elif script == '5':
             #    Script = True
             #    GetInventory(server,headers,username,password)
