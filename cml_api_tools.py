@@ -352,7 +352,7 @@ def FTDUpload(cml):
     # If Image does not exist on CML server
     else:
         try:
-            print(f'Uploading Image {image_file.split("/")[-1]} to CML server and Creating Node/Image Definitions...\n')
+            print(f'Uploading Image {image_name} to CML server and Creating Node/Image Definitions...\n')
             r = cml.definitions.upload_image_file(image_file)
             headers = {'Accept': 'application/yaml', 'Content-Type': 'application/yaml'}
             S = cml.session
