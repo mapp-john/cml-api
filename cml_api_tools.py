@@ -304,20 +304,25 @@ def FTDUpload(cml):
             print('MUST PROVIDE INPUT FILE...')
             Test = False
     # Validate if image is already on server
+    Dir = ''
+    image_name = image_file.split("/")[-1]
     I = cml.definitions.image_definitions()
     url = f'{cml.url}/api/v0/list_image_definition_drop_folder'
     S = cml.session
     r = S.get(url)
     images = r.json()
     images += [i['disk_image'] for i in I]
+    for i in I:
+        if image_name in i['disk_image']:
+            Dir = i['disk_subfolder']
     # If Image already exists on CML server
-    if image_file.split('/')[-1] in images:
-        print(f'\nImage {image_file.split("/")[-1]} already exists on server\nLooking for Node definition for image...\n')
+    if image_name in images:
+        print(f'\nImage {image_name} already exists on server\nLooking for Node definition for image...\n')
         nodes = cml.definitions.node_definitions()
         d = False
         for n in nodes:
             D = cml.definitions.image_definitions_for_node_definition(n['id'])
-            if (D != []) and (D[0]['disk_image'] == image_file.split("/")[-1]):
+            if (D != []) and (D[0]['disk_image'] == image_name):
                 print(f'Node Definition: {D[0]["node_definition_id"]}')
                 d = True
                 return
@@ -325,7 +330,7 @@ def FTDUpload(cml):
                 continue
         # If no definition exists, create them
         if not d:
-            print(f'Node Defniition not found for image {image_file.split("/")[-1]}...\nCreating Node Definition....\n')
+            print(f'Node Defniition not found for image {image_name}...\nCreating Node Definition....\n')
             try:
                 headers = {'Accept': 'application/yaml', 'Content-Type': 'application/yaml'}
                 S = cml.session
@@ -336,7 +341,8 @@ def FTDUpload(cml):
                 # Create Image Definition
                 url = f'{cml.url}/api/v0/image_definitions'
                 Y = yaml.safe_load(open('definitions/ftdv-6.6_image_def.yml','r').read())
-                Y['disk_image'] = image_file.split('/')[-1]
+                Y['disk_image'] = image_name
+                Y['disk_subfolder'] = Dir
                 r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
                 print(f'Node Definition "ftdv" created successfully')
                 return
