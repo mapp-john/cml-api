@@ -13,6 +13,7 @@ from virl2_client import ClientLibrary as cmlClient
 #
 #
 # Define Password Function
+# Returns Password String
 def define_password():
     password = None
     while not password:
@@ -41,4 +42,19 @@ def GetAllLabDetails(cml):
         count += 1
     return d
 
+
+#
+#
+#
+# Define Delete Lab funciton to simplify....
+# Returns True if Delete successful
+def DeleteLab(cml,ID):
+    try:
+        lab = cml.join_existing_lab(ID)
+        lab.stop()
+        lab.wipe()
+        lab.remove()
+        return True
+    except:
+        return False
 

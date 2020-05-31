@@ -1,0 +1,11 @@
+id: ftdv-6.6
+node_definition_id: ftdv
+description: ftd 6.6.0-90
+label: ftd 6.6.0-90
+disk_image: Cisco_Firepower_Threat_Defense_Virtual-6.6.0-90.qcow2
+read_only: false
+ram: 8192
+cpus: 4
+boot_disk_size: 49
+disk_subfolder: ftdv-6.6
+schema_version: 0.0.1

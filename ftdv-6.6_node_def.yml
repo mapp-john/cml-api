@@ -1,0 +1,66 @@
+id: ftdv
+configuration:
+  generator:
+    driver: asav
+  provisioning:
+    volume_name: disk
+    media_type: iso
+    files:
+      - name: day0-config
+        content: ''
+        editable: true
+inherited:
+  image:
+    ram: true
+    cpus: true
+    data_volume: true
+    boot_disk_size: true
+  node:
+    ram: true
+    cpus: true
+    data_volume: true
+    boot_disk_size: true
+device:
+  interfaces:
+    has_loopback_zero: false
+    default_count: 2
+    management:
+      - Management0/0
+    physical:
+      - Management0/0
+      - GigabitEthernet0/0
+      - GigabitEthernet0/1
+      - GigabitEthernet0/2
+      - GigabitEthernet0/3
+      - GigabitEthernet0/4
+      - GigabitEthernet0/5
+      - GigabitEthernet0/6
+    serial_ports: 1
+general:
+  description: Cisco Firepower Threat Defense Virtual, v6.6
+  nature: firewall
+  read_only: true
+schema_version: 0.0.1
+sim:
+  linux_native:
+    cpus: 4
+    disk_driver: virtio
+    driver: asav
+    libvirt_domain_driver: kvm
+    nic_driver: virtio
+    ram: 8192
+    boot_disk_size: 49
+boot:
+  timeout: 120
+  completed:
+    - 'INFO: Power-On Self-Test complete.'
+pyats:
+  os: asa
+  config_extract_command: show run
+ui:
+  description: Cisco Firepower Threat Defense Virtual, v6.6
+  group: Cisco
+  icon: firewall
+  label: FTDv
+  label_prefix: ftdv-
+  visible: true
