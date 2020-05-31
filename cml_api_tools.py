@@ -147,7 +147,9 @@ def TopoDownload(cml):
         save = input('Would You Like To Save The Output To File? [y/N]: ').lower()
         if save in (['yes','ye','y']):
             # Random Generated YAML Output File
-            filename = f'{resp["lab"]["title"]}_v{resp["lab"]["version"]}.yml'
+            if not os.path.exists('topologies'):
+                os.mkdir('topologies')
+            filename = f'topologies/{resp["lab"]["title"]}_v{resp["lab"]["version"]}.yml'
             with open(filename, 'w') as OutFile:
                 OutFile.write(yaml.safe_dump(resp))
             print(f'*\n*\nTopology File Created... {filename}\n')
@@ -350,11 +352,11 @@ def FTDUpload(cml):
             S = cml.session
             # Create Node Definition
             url = f'{cml.url}/api/v0/node_definitions'
-            Y = yaml.safe_load(open('ftdv-6.6_node_def.yml','r').read())
+            Y = yaml.safe_load(open('definitions/ftdv-6.6_node_def.yml','r').read())
             r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
             # Create Image Definition
             url = f'{cml.url}/api/v0/image_definitions'
-            Y = yaml.safe_load(open('ftdv-6.6_image_def.yml','r').read())
+            Y = yaml.safe_load(open('definitions/ftdv-6.6_image_def.yml','r').read())
             Y['disk_image'] = image_file.split('/')[-1]
             r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
             print(f'Node and Image Definition "ftdv" created successfully')
