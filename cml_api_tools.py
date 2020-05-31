@@ -304,7 +304,7 @@ def FTDUpload(cml):
             print('MUST PROVIDE INPUT FILE...')
             Test = False
     # Validate if image is already on server
-    Dir = ''
+    Dir = 'ftdv-6.6'
     image_name = image_file.split("/")[-1]
     I = cml.definitions.image_definitions()
     url = f'{cml.url}/api/v0/list_image_definition_drop_folder'
