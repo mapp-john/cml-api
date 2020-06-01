@@ -77,7 +77,7 @@ def BlankGet(cml):
         else:
             r.raise_for_status()
             print(f'Error occurred in GET --> {resp}')
-    except requests.exceptions.HTTPError:
+    except:
         print(f'Error in connection --> {traceback.format_exc()}')
         print(json.dumps(resp,indent=4))
     # End
@@ -303,18 +303,22 @@ def FTDUpload(cml):
         else:
             print('MUST PROVIDE INPUT FILE...')
             Test = False
-    # Validate if image is already on server
-    Dir = 'ftdv-6.6'
-    image_name = image_file.split("/")[-1]
+    # Load YAML files and update image name
+    image_name = os.path.split(image_file)[-1]
+    Yn = yaml.safe_load(open('definitions/ftdv-6.6_node_def.yml','r').read())
+    Yi = yaml.safe_load(open('definitions/ftdv-6.6_image_def.yml','r').read())
+    Yi['disk_image'] = image_name
+    # Pull CML image definitions and uploaded images
     I = cml.definitions.image_definitions()
+    for i in I:
+        if image_name in i['disk_image']:
+            Yi['disk_subfolder'] = i['disk_subfolder']
+    headers = {'Accept': 'application/yaml', 'Content-Type': 'application/yaml'}
     url = f'{cml.url}/api/v0/list_image_definition_drop_folder'
     S = cml.session
     r = S.get(url)
     images = r.json()
     images += [i['disk_image'] for i in I]
-    for i in I:
-        if image_name in i['disk_image']:
-            Dir = i['disk_subfolder']
     # If Image already exists on CML server
     if image_name in images:
         print(f'\nImage {image_name} already exists on server\nLooking for Node definition for image...\n')
@@ -332,19 +336,13 @@ def FTDUpload(cml):
         if not d:
             print(f'Node Defniition not found for image {image_name}...\nCreating Node Definition....\n')
             try:
-                headers = {'Accept': 'application/yaml', 'Content-Type': 'application/yaml'}
-                S = cml.session
                 # Create Node Definition
                 url = f'{cml.url}/api/v0/node_definitions'
-                Y = yaml.safe_load(open('definitions/ftdv-6.6_node_def.yml','r').read())
-                r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
+                r = S.post(url,headers=headers,data=yaml.safe_dump(Yn))
                 # Create Image Definition
                 url = f'{cml.url}/api/v0/image_definitions'
-                Y = yaml.safe_load(open('definitions/ftdv-6.6_image_def.yml','r').read())
-                Y['disk_image'] = image_name
-                Y['disk_subfolder'] = Dir
-                r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
-                print(f'Node Definition "ftdv" created successfully')
+                r = S.post(url,headers=headers,data=yaml.safe_dump(Yi))
+                print(f'Node and Image Definition for "ftdv" created successfully')
                 return
             except:
                 print(f'\nError Occurred --> {traceback.format_exc()}\n')
@@ -352,20 +350,21 @@ def FTDUpload(cml):
     # If Image does not exist on CML server
     else:
         try:
-            print(f'Uploading Image {image_name} to CML server and Creating Node/Image Definitions...\n')
-            r = cml.definitions.upload_image_file(image_file)
-            headers = {'Accept': 'application/yaml', 'Content-Type': 'application/yaml'}
-            S = cml.session
-            # Create Node Definition
-            url = f'{cml.url}/api/v0/node_definitions'
-            Y = yaml.safe_load(open('definitions/ftdv-6.6_node_def.yml','r').read())
-            r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
-            # Create Image Definition
-            url = f'{cml.url}/api/v0/image_definitions'
-            Y = yaml.safe_load(open('definitions/ftdv-6.6_image_def.yml','r').read())
-            Y['disk_image'] = image_file.split('/')[-1]
-            r = S.post(url,headers=headers,data=yaml.safe_dump(Y))
-            print(f'Node and Image Definition "ftdv" created successfully')
+            print(f'!\n!\nUnfortunately the Image Upload API does not function properly at this time...\nPlease manually upload image at {cml.url}/manage_image_uploads/\nthen return to this script to configure Image/Node Definitions...\n!\n!\n')
+
+            #TODO: Image Upload API seemed to work, and completes successfully.
+            # However, the "ftdv" node is never able to start when added to a lab, suggesting to me corrupted upload.
+            # When image is uploaded via the WebUI, and Image/Node Definitions created via the API, the node is able to start in lab
+
+            #print(f'Uploading Image {image_name} to CML server and Creating Node/Image Definitions...\n')
+            #r = cml.definitions.upload_image_file(image_file)
+            ## Create Node Definition
+            #url = f'{cml.url}/api/v0/node_definitions'
+            #r = S.post(url,headers=headers,data=yaml.safe_dump(Yn))
+            ## Create Image Definition
+            #url = f'{cml.url}/api/v0/image_definitions'
+            #r = S.post(url,headers=headers,data=yaml.safe_dump(Yi))
+            #print(f'Node and Image Definition for "ftdv" created successfully')
             return
 
         except:
@@ -520,7 +519,7 @@ if __name__ == "__main__":
 ***********************************************************************************************
 ''')
         Loop = input('*\n*\nWould You Like To use another tool? [y/N]').lower()
-        if Loop not in (['yes','ye','y']):
+        if Loop not in (['yes','ye','y','1','2','3','4','5','6']):
             break
 
 
