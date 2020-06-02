@@ -65,10 +65,8 @@ def BlankGet(cml):
             save = input('Would You Like To Save The Output To File? [y/N]: ').lower()
             if save in (['yes','ye','y']):
                 # Random Generated JSON Output File
-                filename = ''
-                for i in range(6):
-                    filename += chr(random.randint(97,122))
-                filename += '.txt'
+                filename = ''.join(i for i in [chr(random.randint(97,122)) for i in range(6)])
+                filename += '.json'
                 print(f'*\n*\nRANDOM LOG FILE CREATED... {filename}\n')
                 with open(filename, 'a') as OutFile:
                     OutFile.write(json.dumps(resp,indent=4))
